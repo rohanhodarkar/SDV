@@ -671,7 +671,7 @@ class Metadata:
         if foreign_key is None:
             foreign_key = primary_key
 
-        parent_key_meta = copy.deepcopy(self.get_field_meta(parent, primary_key))
+        parent_key_meta = copy.deepcopy(self.get_field_meta(parent, foreign_key))
         child_key_meta = copy.deepcopy(self.get_field_meta(child, foreign_key))
 
         # Validate relationships
@@ -690,14 +690,14 @@ class Metadata:
         child_key_meta['type'] = 'id'
         child_key_meta['ref'] = {
             'table': parent,
-            'field': primary_key
+            'field': foreign_key
         }
 
         # Make sure that key subtypes are the same
         if child_key_meta['subtype'] != parent_key_meta['subtype']:
             raise ValueError('Parent and Child key subtypes mismatch')
 
-        self._metadata['tables'][parent]['fields'][primary_key] = parent_key_meta
+        self._metadata['tables'][parent]['fields'][foreign_key] = parent_key_meta
         self._metadata['tables'][child]['fields'][foreign_key] = child_key_meta
 
         # Re-analyze the relationships

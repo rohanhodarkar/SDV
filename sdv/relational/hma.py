@@ -159,7 +159,7 @@ class HMA1(BaseRelationalModel):
             foreign_keys = self.metadata.get_foreign_keys(table_name, child_name)
             for index, foreign_key in enumerate(foreign_keys):
                 extension = self._get_extension(child_name, child_table, foreign_key)
-                table = table.merge(extension, how='left', right_index=True, left_index=True)
+                table = table.merge(extension, how='left', right_index=True, left_on=foreign_key)#  left_index=True)
                 num_rows_key = f'__{child_name}__{foreign_key}__num_rows'
                 table[num_rows_key].fillna(0, inplace=True)
                 self._max_child_rows[num_rows_key] = table[num_rows_key].max()
@@ -198,10 +198,10 @@ class HMA1(BaseRelationalModel):
             del table_meta['fields'][primary_key]
 
         keys = {}
-        for name, field in list(fields.items()):
-            if field['type'] == 'id':
-                keys[name] = table_data.pop(name).values
-                del fields[name]
+        #for name, field in list(fields.items()):
+        #    if field['type'] == 'id':
+        #        keys[name] = table_data.pop(name).values
+        #        del fields[name]
 
         for column in table_data.columns:
             if column not in fields:
@@ -364,7 +364,6 @@ class HMA1(BaseRelationalModel):
         num_rows = num_rows or model._num_rows
         sampled = model._sample_with_progress_bar(
             num_rows, output_file_path='disable', show_progress_bar=False)
-
         primary_key_name = self.metadata.get_primary_key(table_name)
         if primary_key_name:
             primary_key_values = self._get_primary_keys(table_name, len(sampled))
@@ -396,7 +395,7 @@ class HMA1(BaseRelationalModel):
 
         table_rows = self._sample_rows(model, table_name)
         if len(table_rows):
-            parent_key = self.metadata.get_primary_key(parent_name)
+            parent_key = foreign_key#self.metadata.get_primary_key(parent_name)
             table_rows[foreign_key] = parent_row[parent_key]
 
             previous = sampled_data.get(table_name)
